@@ -4,7 +4,7 @@ dir_scripts = ./scripts
 ;##############################################################################
 ; AUTHENTICATION - comment out to disable
 [auth]
-password = f00bar
+;password = f00bar
 
 ; used to generate hashs, tokens and challenges. please change it.
 secret   = 9d9c8a3fb07ccb2c7a56d2f89b2dee6f
@@ -43,8 +43,8 @@ label    = "ZFS"
 selector = ".probe-zfs"
 
 [filter-31]
-label    = "ZFS Adv."
-selector = ".probe-zfs-adv"
+label    = "Gluster"
+selector = ".probe-gluster"
 
 [filter-40]
 label    = "Processes"
@@ -162,21 +162,22 @@ order  = 11
 label  = "I/O"
 class  = probe-io
 ;cmd    = "iostat -dcnx 1 2"
-cmd    = /usr/bin/"iostat -dnx 1 2"
+cmd    = "/usr/bin/iostat -dnx 1 2"
 order  = 20
 
 [probe-zpool_iostat]
 label  = "ZFS I/O"
 class  = "probe-zfs probe-io"
 ;cmd    = "zpool iostat -v 1 2"
-cmd    = "/usr/sbin/zpool iostat 1 2"
+cmd    = "/sbin/zpool iostat 1 2"
 order  = 21
 
 ; http://www.brendangregg.com/Perf/network.html#nicstat
 [probe-nicstat]
 label  = "Network-Interfaces (<a href='http://www.brendangregg.com/K9Toolkit/nicstat.c' target='_blank'>nicstat</a>)"
 class  = probe-io
-cmd    = "/usr/sbin/nicstat 1 2"
+#cmd    = "/usr/sbin/nicstat 1 2"
+cmd    = "/usr/bin/ifstat 1 2"
 order  = 22
 
 
@@ -186,53 +187,52 @@ order  = 22
 [probe-zpool_status]
 label  = "ZFS Status"
 class  = probe-zfs
-cmd    = "/usr/sbin/zpool status -x"
+cmd    = "sudo /sbin/zpool status -x"
 order  = 31
 
 [probe-zpool]
 label  = "ZFS Pools"
 class  = probe-zfs
-cmd    = "/usr/sbin/zpool status -v"
+cmd    = "sudo /sbin/zpool status -v"
 order  = 32
 
 [probe-zfs]
 label  = "ZFS Filesystems"
 class  = probe-zfs
-cmd    = "/usr/sbin/zfs list -t fs -o name,used,avail,mountpoint,sharesmb,sharenfs,keystatus"
+cmd    = "sudo /sbin/zfs list -t filesystem -o name,used,avail,mountpoint,sharesmb,sharenfs,compressratio"
 order  = 33
 
 [probe-zfs_snaps]
 label  = "ZFS Snapshots"
 class  = probe-zfs
-cmd    = "/usr/sbin/zfs list -t snapshot"
+cmd    = "sudo /sbin/zfs list -t snapshot"
 order  = 34
 
 ; https://github.com/mharsch/arcstat
 ; http://hardforum.com/showpost.php?p=1037874802&postcount=22
 [probe-zfs_arc_stat]
 label  = "ZFS ARC Stat"
-class  = probe-zfs-adv
-cmd    = "/opt/arcstat.pl -f read,hits,miss,hit%,l2read,l2hits,l2miss,l2hit%,arcsz,l2size 1 3"
+class  = probe-zfs
+cmd    = "sudo /opt/tools/arcstat.pl -f read,hits,miss,hit%,l2read,l2hits,l2miss,l2hit%,arcsz,l2size 1 3"
 order  = 35
 
-; http://cuddletech.com/arc_summary/
-; Thanks to ChrisBenn http://hardforum.com/showpost.php?p=1037874906&postcount=23
-[probe-zfs_arc_summary]
-label  = "ZFS ARC Summary"
-class  = probe-zfs-adv
-cmd    = "/opt/arc_summary.pl"
+[probe-gluster_vol]
+label  = "Gluster Volumes"
+class  = probe-gluster
+cmd    = "sudo /usr/sbin/gluster vol list"
 order  = 36
 
-; http://www.richardelling.com/Home/scripts-and-programs-1/zilstat
-; DTrace requires additional privileges, so use:
-; usermod -K defaultpriv=basic,dtrace_user,dtrace_proc,dtrace_kernel webservd
-; to give webservd full read-only kernel-access
-; Thanks to ChrisBenn http://hardforum.com/showpost.php?p=1037874906&postcount=23
-[probe-zfs_zil_stat]
-label  = "ZFS ZIL Stat"
-class  = probe-zfs-adv
-cmd    = "/usr/bin/ksh /opt/zilstat.ksh -M -t 1 3"
+[probe-gluster_status]
+label  = "Gluster Volume Status"
+class  = probe-gluster
+cmd    = "sudo /usr/sbin/gluster vol status"
 order  = 37
+
+[probe-gluster_Peer]
+label  = "Gluster peer status"
+class  = probe-gluster
+cmd    = "sudo /usr/sbin/gluster peer status"
+order  = 38
 
 
 ;*****************************
@@ -241,7 +241,7 @@ order  = 37
 [probe-svcs_x]
 label  = "Service-Problems"
 class  = probe-svcs
-cmd    = "/usr/bin/svcs -x"
+cmd    = "/usr/sbin/service --status-all"
 order  = 40
 
 [probe-svcs]
@@ -258,19 +258,19 @@ order  = 41
 [probe-links]
 label  = "Links"
 class  = probe-network
-cmd    = "/usr/sbin/dladm show-link"
+cmd    = "/bin/netstat -rn"
 order  = 42
 
 [probe-interfaces]
 label  = "Interfaces"
 class  = probe-network
-cmd    = "/usr/sbin/ipadm show-if"
+cmd    = "/sbin/ifconfig"
 order  = 43
 
 [probe-hosts]
 label  = "Hosts"
 class  = probe-network
-cmd    = "/usr/gnu/bin/cat /etc/hosts | egrep -v '^#'"
+cmd    = "/usr/lib/klibc/bin/cat /etc/hosts | egrep -v '^#'"
 order  = 44
 
 [probe-shares]
@@ -306,7 +306,7 @@ label  = "Processes"
 class  = probe-ps
 ;cmd    = "ps axuw"
 ;cmd    = "ps -e -o pid -o user -o s -o pcpu -o vsz  -o stime -o args"
-cmd    = "/usr/bin/ps -e -o pid -o user -o s -o pcpu -o pmem -o vsz  -o stime -o comm"
+cmd    = "/bin/ps -e -o pid -o user -o s -o pcpu -o pmem -o vsz  -o stime -o comm"
 order  = 53
 
 
@@ -316,13 +316,13 @@ order  = 53
 [probe-dmesg]
 label  = "Kernel Ring Buffer (dmesg)"
 class  = probe-logs
-cmd    = "/usr/sbin/dmesg"
+cmd    = "/usr/lib/klibc/bin/dmesg"
 order  = 60
 
 [probe-adm_msgs]
 label  = "Messages (/var/adm/messages)"
 class  = probe-logs
-cmd    = "/usr/gnu/bin/cat /var/adm/messages"
+cmd    = "/usr/lib/klibc/bin/cat /var/adm/messages"
 order  = 61
 confirm = "Display?"
 
@@ -333,13 +333,14 @@ confirm = "Display?"
 [probe-uname]
 label  = "System Information"
 class  = probe-sys
-cmd    = "/usr/gnu/bin/uname --all"
+cmd    = "/usr/lib/klibc/bin/uname -a"
 order  = 70
 
 [probe-psrinfo]
 label  = "Processor"
 class  = probe-sys
-cmd    = "/usr/sbin/psrinfo -p -v"
+#cmd    = "/usr/sbin/psrinfo -p -v"
+cmd    = "/usr/lib/klibc/bin/cat /proc/cpuinfo"
 order  = 71
 
 [probe-cpu_freq]
