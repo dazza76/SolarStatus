@@ -1,10 +1,10 @@
 ================================================================
-Web-Interface for Solaris-Servers to display Status-Information
+Web-Interface for Debian-Servers to display Status-Information
 ================================================================
 
 The Interface is based on minimalistic HTML5 with jQuery (Java-Script)
 
-Tested on Solaris 11 Express, targeted for Open Indiana as well
+Tested on Openmediavault 2 with zfs on linux and gluster 3.3
 	
 Installation:
 	see install directory
@@ -13,17 +13,19 @@ Configuration:
 	see conf.ini.php
 	see scripts-directory
 
-Screenshot: https://github.com/hotzen/SolarStatus/tree/master/screenshots
+Screenshot: https://github.com/dazza76/SolarStatus/tree/master/screenshots
 Download:   https://github.com/hotzen/SolarStatus/tree/master/dist
 
-Feedback appreciated
 
-Cheers,
-Kai <kai_at_meder_d0t_info>
+Forked from 
+https://github.com/hotzen/SolarStatus
+
+Thank you Hotzen for the very nice frame work
+
+Feedback appreciated
 
 I put SolarStatus under the MIT License, see the attached LICENSE file.
 
 Roadmap:
-- uname-script does not output anything, hint appreciated
-- enhance overview-page
-- include graphs into overview-page (jquery-sparklines)
+- Fix all pages to work with debian ( maybe centos we will see)
+- fix sudo requirment for zfs and gluster 
